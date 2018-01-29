@@ -1,15 +1,26 @@
 const axios = require("axios");
 
-const getExchangeRate = (from, to) => {
-    return axios.get(`https://api.fixer.io/latest?base=${from}`).then((response) => {
-        return response.data.rates[to];
-    });
+const getExchangeRate = async (from, to) => {
+    try {
+        const response = await axios.get(`https://api.fixer.io/latest?base=${from}`);
+        const rate = response.data.rates[to];
+        if(rate){
+            return rate;
+        }else{
+            throw new Error();    
+        }  
+    } catch (error) {
+        throw new Error(`Unable to get exchange rate for ${from} and ${to}.`);
+    }    
 };
 
-const getCountries = (currency) => {
-    return axios.get(`https://restcountries.eu/rest/v2/currency/${currency}`).then((response) => {
+const getCountries = async (currency) => {
+    try {
+        const response = await axios.get(`https://restcountries.eu/rest/v2/currency/${currency}`);
         return response.data.map((country) => country.name);
-    });
+    } catch (error) {
+        throw new Error(`Unable to get countries that use ${currency}.`);
+    }
 };
 
 const convertCurrency = async (from, to, amount) => {
@@ -21,4 +32,4 @@ const convertCurrency = async (from, to, amount) => {
 
 //getExchangeRate("USD","BRL").then((rate) => console.log(rate));
 //getCountries("USD").then((name) => console.log(name));
-convertCurrency("BRL","USD",500).then(console.log);
+convertCurrency("BRL","USD",500).then(console.log).catch((e) => console.log(e.message));
